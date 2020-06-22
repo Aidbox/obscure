@@ -15,7 +15,7 @@
 (defmethod sut/run-step ::fn [ctx step]
   ((:fn step) ctx step))
 
-(deftest ghost-jobs
+(deftest obscure-jobs
 
 
   ;; safe-run-step

@@ -6,8 +6,8 @@
 KUBE_BASE=http://kube-url/
 KUBE_TOKEN=sa-token
 TELEGRAM_TOKEN=tg-bot-token
-GHOST_CONFIG=/path/to/ghost.yaml
-GHOST_DATA=/path/to/persistent/dir
+OBSCURE_CONFIG=/path/to/obscure.yaml
+OBSCURE_DATA=/path/to/persistent/dir
 ```
 
 ## Obscure config
