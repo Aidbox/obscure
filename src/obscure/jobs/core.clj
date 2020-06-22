@@ -253,17 +253,22 @@
   (let [job (get-in ctx [:config :jobs (keyword job-id)])]
     (cond
       (nil? job)
-      {:status "error"
-       :ctx {:error (str "Not found job " job-id)}}
+      (do
+        (println "no such job")
+        {:status "error"
+         :ctx {:error (str "Not found job " job-id)}})
 
       :else
-      (let [result (assoc (run-steps ctx (:steps job))
-                          :job-id job-id
-                          :job-hash (:hash job))]
-        ;; save result
-        (println result)
-        result
-        ))))
+      (do
+        (println "wow")
+        (let [result (assoc (run-steps ctx (:steps job))
+                            :job-id job-id
+                            :job-hash (:hash job))]
+          ;; save result
+          (println result)
+          result
+          ))))
+  )
 
 (defn reschedule-jobs [*ctx]
   (let [ctx @*ctx
@@ -276,9 +281,17 @@
                 (get-in ctx [:config :jobs]))]
     (swap! *ctx assoc-in [:jobs :schedule] jobs-schedule)))
 
+(defn run-thread [nm f]
+  (let [t (Thread. f)]
+    (.setName t nm)
+    (.setDaemon t false)
+    (.start t)
+    t))
+
 
 ;; FIXME: should start asynchronously
 (defn job-watcher [*ctx]
+  (println "Start job watcher")
   (while (= :active (get @*ctx ::job-watcher-status))
     (let [ctx @*ctx]
       (doseq [[job-id cfg] (get-in ctx [:jobs :schedule])]
@@ -289,7 +302,9 @@
           (catch Exception e
             (println "ERROR:" e)))))
     (Thread/sleep 1000))
-  (swap! *ctx dissoc ::job-watcher-status))
+  (do
+    (println "Stop job watcher")
+    (swap! *ctx dissoc ::job-watcher-status)))
 
 (defn start [*ctx]
   (if (= :active (get @*ctx ::job-watcher-active?))
@@ -299,7 +314,7 @@
       (reschedule-jobs *ctx)
       (swap! *ctx
              assoc
-             ::job-watcher (future (job-watcher *ctx))
+             ::job-watcher (run-thread "watcher" (fn [] (job-watcher *ctx)))
              ::job-watcher-status :active)
       :started)))
 

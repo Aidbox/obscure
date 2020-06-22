@@ -49,8 +49,8 @@
   (let [obscure-data (env :obscure-data "/tmp/obscure")
         obscure-config (yaml/parse-string (slurp (env :obscure-config)))
         cfg (-> obscure-config
-                (assoc-in [:k8s :base] (env :kube-base))
-                (assoc-in [:k8s :token] (env :kube-token))
+                (assoc-in [:k8s :base] (or (env :kube-base nil) (env :kubernetes-service-host)))
+                (assoc-in [:k8s :token] (or (env :kube-token nil) (slurp "/var/run/secrets/kubernetes.io/serviceaccount/token")))
                 (assoc :data-dir obscure-data)
                 (assoc-in [:telegram :token] (env :telegram-token nil)))]
     (start cfg)))
