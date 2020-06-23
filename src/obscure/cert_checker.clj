@@ -4,8 +4,11 @@
             [obscure.jobs.core]
             [clojure.string :as str]))
 
+
 (defn get-cn [cert]
-  (subs (first (filter #(str/starts-with? % "CN=") (str/split (.getName (.getSubjectDN cert)) #","))) 3))
+    (let [namings (str/split (.getName (.getSubjectDN cert)) #",")
+          sert-name (or (first (filter #(str/starts-with? % "CN=") namings)) "")]
+      (second (str/split sert-name #"=" 2))))
 
 (defn check-cert [url]
   (try
