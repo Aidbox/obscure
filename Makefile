@@ -8,7 +8,7 @@ IMAGE = aidbox/obscure:${VERSION}
 TS  = $(shell date +%FT%T)
 
 repl:
-	clj -A:nrepl -e "(-main)" -r
+	clj -A:nrepl -m nrepl.cmdline --middleware "[cider.nrepl/cider-middleware refactor-nrepl.middleware/wrap-refactor]"
 
 jar:
 	clj -A:build -p resources

@@ -20,6 +20,7 @@ secrets.yaml
 keys
 .env
 pgdata
+dev/scratch.clj
 ui/build.dev
 ui/build.prod
 ui/target
