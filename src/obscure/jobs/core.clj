@@ -99,7 +99,7 @@
 
   )
 
-(defn resolve-pod [k8s-ctx {:keys [kind namespace name container]}]
+(defn resolve-pod [k8s-ctx {:keys [kind namespace name container apiVersion]}]
   (try
     (assert namespace "namespace must be specified")
     (assert name "name must be specified")
@@ -127,7 +127,7 @@
 
       (= "Deployment" kind)
       (let [deploy (k8s/get-resource k8s-ctx {:kind "Deployment"
-                                              :apiVersion "extensions/v1beta1"
+                                              :apiVersion (or apiVersion "extensions/v1beta1")
                                               :metadata {:name name
                                                          :namespace namespace}})
             _ (assert (some? deploy) (str "Deployment " namespace "/" name " not found"))
