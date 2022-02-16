@@ -6,7 +6,7 @@
    [chrono.now :as now]
    [cheshire.core :as json]
    [obscure.jobs.core]
-   [morse.polling :as p]
+   [obscure.jobs.tg-wrapper :as tg-wrapper]
    [org.httpkit.client :as http]
    [clojure.string :as str]))
 
@@ -116,15 +116,31 @@
       (assert (get-in @*ctx [:config :telegram :token]) "Telegram token must be specified")
       (let [resp (json/parse-string (:body @(http/get (str base-url (get-in @*ctx [:config :telegram :token]) "/getMe"))) keyword)]
         (if (:ok resp)
-          (do
-            (swap! *ctx assoc :tg-bot (p/start (get-in @*ctx [:config :telegram :token]) #(handler @*ctx %)))
+          (let [sleep-period {:sleep (* 1 60 1000)}] ;; INFO: min s ms
+            (swap! *ctx assoc :tg-bot (tg-wrapper/start
+                                       (get-in @*ctx [:config :telegram :token]) 
+                                       #(handler @*ctx %)
+                                       sleep-period))
             (println (str "Telegram bot @" (get-in resp [:result :username]) " started"))
             :started)
           (println (str "Can not start telegram bot: '" (:description resp) "'")))))))
 
+(comment
+  (def t "<your-token>")
+
+  (def sleep-period {:sleep (* 15 1000)})
+
+  (def instance
+    (tg-wrapper/start
+     t
+     (fn [data] (handler nil data))
+     sleep-period))
+
+  (tg-wrapper/stop instance))
+
 (defn stop [*ctx]
   (when (:tg-bot @*ctx)
-    (p/stop (:tg-bot @*ctx))
+    (tg-wrapper/stop (:tg-bot @*ctx))
     (swap! *ctx dissoc :tg-bot)))
 
 (comment
