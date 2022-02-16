@@ -1,6 +1,9 @@
 .EXPORT_ALL_VARIABLES:
 .PHONY: test jar dock publish
 
+.env:
+	touch .env
+
 include .env
 
 VERSION  = $(shell cat ./VERSION)
